@@ -64,6 +64,9 @@ pub struct RabbitmqApiConfig {
     pub host: String,
     pub port: String,
 }
+
+//retrieves messages from the given queue.
+//messages can be filtered by time frame, both from and to are optional
 pub async fn get_messages(
     app_state: State<Arc<AppState>>,
     Query(message_query): Query<MessageQuery>,
@@ -78,6 +81,8 @@ pub async fn get_messages(
     Ok((StatusCode::OK, Json(messages)))
 }
 
+//replays messages based on the given replay mode, either by time frame or by header value
+//a time stamp or transaction uuid can be added to the message upon replay
 pub async fn replay(
     app_state: State<Arc<AppState>>,
     Json(replay_mode): Json<ReplayMode>,
@@ -96,6 +101,7 @@ pub async fn replay(
     Ok((StatusCode::CREATED, Json(replayed_messages)))
 }
 
+//checks if the service is up and running and can connect to rabbitmq can be established
 pub async fn health(app_state: State<Arc<AppState>>) -> Result<impl IntoResponse, AppError> {
     let pool = app_state.pool.clone();
     let connection = pool
@@ -114,6 +120,7 @@ pub async fn health(app_state: State<Arc<AppState>>) -> Result<impl IntoResponse
     }
 }
 
+//read out the environment variables and configure the application state accordingly
 pub async fn initialize_state() -> Arc<AppState> {
     let pool_size = std::env::var("AMQP_CONNECTION_POOL_SIZE")
         .unwrap_or("5".into())

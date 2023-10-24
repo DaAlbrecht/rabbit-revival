@@ -63,7 +63,8 @@ fn setup_metrics_recorder() -> PrometheusHandle {
 
 async fn main_app() -> Router {
     Router::new()
-        .route("/", get(get_messages).post(replay))
+        .route("/list", get(get_messages))
+        .route("/replay", get(replay))
         .route("/health", get(health))
         .layer(TraceLayer::new_for_http())
         .with_state(initialize_state().await)

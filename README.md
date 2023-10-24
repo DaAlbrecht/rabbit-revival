@@ -31,7 +31,7 @@ docker run -it --rm --name rabbitmq -p 5552:5552 -p 5672:5672 -p 15672:15672 rab
 ```
 
 To generate some local dummy data run `cargo test -- --ignored`. 
-This will generate messages in the queue `replay` with timestamps and a transaction header with the name `x-stream-transaction-id`.
+This will generate messages in the queue `replay` with time stamps and a transaction header with the name `x-stream-transaction-id`.
 
 ## Start the server
 
@@ -43,13 +43,13 @@ This will generate messages in the queue `replay` with timestamps and a transact
 ## List messages 
 
 ```bash
-curl 'localhost:3000/?queue=replay'  | jq
+curl 'localhost:3000/list?queue=replay'  | jq
 ```
 
 ## Replay messages 
 
 ```bash
-curl localhost:3000 -H 'Content-Type: application/json'  -d '{"queue":"replay", "header":{"name":"x-stream-transaction-id","value":"transaction_499"}}' | jq
+curl localhost:3000/replay -H 'Content-Type: application/json'  -d '{"queue":"replay", "header":{"name":"x-stream-transaction-id","value":"transaction_499"}}' | jq
 ```
 
 ## Contributing

@@ -55,6 +55,7 @@ pub async fn replay_time_frame(
     let connection = pool.get().await?;
     let channel = connection.create_channel().await?;
 
+    //set prefetch count to 1000
     channel
         .basic_qos(1000u16, BasicQosOptions { global: false })
         .await?;
@@ -117,6 +118,7 @@ pub async fn fetch_messages(
     let connection = pool.get().await?;
     let channel = connection.create_channel().await?;
 
+    //set prefetch count to 1000
     channel
         .basic_qos(1000u16, BasicQosOptions { global: false })
         .await?;
@@ -165,7 +167,7 @@ pub async fn fetch_messages(
                         offset: Some(*offset as u64),
                         transaction,
                         timestamp: Some(
-                            //unwrap is save here, because we checked if timestamp is set
+                            //unwrap is safe here, because we checked if time stamp is set
                             chrono::Utc
                                 .timestamp_millis_opt(timestamp.unwrap() as i64)
                                 .unwrap(),
@@ -178,7 +180,7 @@ pub async fn fetch_messages(
                     offset: Some(*offset as u64),
                     transaction,
                     timestamp: Some(
-                        //unwrap is save here, because we checked if timestamp is set
+                        //unwrap is safe here, because we checked if time stamp is set
                         chrono::Utc
                             .timestamp_millis_opt(timestamp.unwrap() as i64)
                             .unwrap(),
@@ -229,6 +231,7 @@ pub async fn replay_header(
 
     let channel = connection.create_channel().await?;
 
+    //set prefetch count to 1000
     channel
         .basic_qos(1000u16, BasicQosOptions { global: false })
         .await?;
@@ -279,6 +282,7 @@ async fn get_queue_message_count(
     rabitmq_api_config: &RabbitmqApiConfig,
     name: &str,
 ) -> Result<Option<u64>> {
+    //amqp does not provide a way to get meta data about a queue thus the management http api is used.
     let client = reqwest::Client::new();
 
     let url = format!(
@@ -311,6 +315,8 @@ async fn get_queue_message_count(
     }
 }
 
+//publishes the given messages, messages can be published with or without
+//transaction- and timestamp headers depending on the environment variables set.
 pub async fn publish_message(
     pool: &deadpool_lapin::Pool,
     message_options: &MessageOptions,
