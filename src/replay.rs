@@ -282,7 +282,7 @@ async fn get_queue_message_count(
     rabitmq_api_config: &RabbitmqApiConfig,
     name: &str,
 ) -> Result<Option<u64>> {
-    //amqp does not provide a way to get meta data about a queue thus the management http api is used.
+    //AMQP does not provide a way to get meta data about a queue thus the management HTTP API is used.
     let client = reqwest::Client::new();
 
     let url = format!(
