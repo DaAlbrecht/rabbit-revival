@@ -5,7 +5,7 @@ use axum::{
     http::Request,
     middleware::{self, Next},
     response::IntoResponse,
-    routing::get,
+    routing::{get, post},
     Router,
 };
 use metrics_exporter_prometheus::{Matcher, PrometheusBuilder, PrometheusHandle};
@@ -64,7 +64,7 @@ fn setup_metrics_recorder() -> PrometheusHandle {
 async fn main_app() -> Router {
     Router::new()
         .route("/list", get(get_messages))
-        .route("/replay", get(replay))
+        .route("/replay", post(replay))
         .route("/health", get(health))
         .layer(TraceLayer::new_for_http())
         .with_state(initialize_state().await)
