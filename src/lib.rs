@@ -156,8 +156,7 @@ pub async fn initialize_state() -> Arc<AppState> {
 
     let cfg = deadpool_lapin::Config {
         url: Some(format!(
-            "amqp://{}:{}@{}:{}/%2f",
-            username, password, host, amqp_port
+            "amqp://{username}:{password}@{host}:{amqp_port}/%2f"
         )),
         pool: Some(PoolConfig::new(pool_size)),
         ..Default::default()

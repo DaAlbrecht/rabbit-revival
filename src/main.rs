@@ -79,7 +79,7 @@ async fn start_main_server() {
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
-        .unwrap()
+        .unwrap();
 }
 
 async fn start_metrics_server() {
@@ -91,7 +91,7 @@ async fn start_metrics_server() {
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
-        .unwrap()
+        .unwrap();
 }
 
 async fn track_metrics<B>(req: Request<B>, next: Next<B>) -> impl IntoResponse {
@@ -119,7 +119,7 @@ async fn track_metrics<B>(req: Request<B>, next: Next<B>) -> impl IntoResponse {
         ("status", status),
     ];
 
-    metrics::gauge!("cpu_usage_percentage", cpu_usage as f64, &labels);
+    metrics::gauge!("cpu_usage_percentage", f64::from(cpu_usage), &labels);
     metrics::gauge!("memory_usage_bytes", memory_usage as f64, &labels);
 
     metrics::increment_counter!("http_requests_total", &labels);

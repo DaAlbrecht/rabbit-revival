@@ -29,7 +29,7 @@ pub struct TransactionHeader {
 }
 
 impl TransactionHeader {
-    pub fn from_fieldtable(field_table: FieldTable, header_name: &str) -> Result<Self> {
+    pub fn from_fieldtable(field_table: &FieldTable, header_name: &str) -> Result<Self> {
         let transaction_id = match field_table.inner().get(header_name) {
             Some(AMQPValue::LongString(transaction_id)) => transaction_id.to_string(),
             _ => return Err(anyhow!("Transaction header {} not found", header_name)),
@@ -348,11 +348,8 @@ pub async fn publish_message(
                     ShortString::from(transaction_header.as_str()),
                     AMQPValue::LongString(uuid.as_str().into()),
                 );
-                transaction = TransactionHeader::from_fieldtable(
-                    headers.clone(),
-                    transaction_header.as_str(),
-                )
-                .ok();
+                transaction =
+                    TransactionHeader::from_fieldtable(&headers, transaction_header.as_str()).ok();
                 lapin::BasicProperties::default()
                     .with_headers(headers)
                     .with_timestamp(timestamp_u64)
@@ -365,11 +362,8 @@ pub async fn publish_message(
                     ShortString::from(transaction_header.as_str()),
                     AMQPValue::LongString(uuid.as_str().into()),
                 );
-                transaction = TransactionHeader::from_fieldtable(
-                    headers.clone(),
-                    transaction_header.as_str(),
-                )
-                .ok();
+                transaction =
+                    TransactionHeader::from_fieldtable(&headers, transaction_header.as_str()).ok();
                 lapin::BasicProperties::default().with_headers(headers)
             }
         };

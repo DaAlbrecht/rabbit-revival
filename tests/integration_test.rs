@@ -59,7 +59,7 @@ async fn create_dummy_data(
     for i in 0..message_count {
         let data = b"test";
         let timestamp = Utc::now().timestamp_millis() as u64;
-        let transaction_id = format!("transaction_{}", i);
+        let transaction_id = format!("transaction_{i}");
         let mut headers = FieldTable::default();
         headers.insert(
             ShortString::from("x-stream-transaction-id"),
@@ -80,7 +80,7 @@ async fn create_dummy_data(
         messages.push(Message {
             offset: Some(i as u64),
             transaction: Some(TransactionHeader::from_fieldtable(
-                headers,
+                &headers,
                 "x-stream-transaction-id",
             )?),
             data: String::from_utf8(data.to_vec())?,
@@ -110,8 +110,7 @@ async fn i_test_setup() -> Result<()> {
     loop {
         let res = client
             .get(format!(
-                "http://localhost:{}/api/queues/%2f/{}",
-                management_port, queue_name
+                "http://localhost:{management_port}/api/queues/%2f/{queue_name}"
             ))
             .basic_auth("guest", Some("guest"))
             .send()
@@ -154,8 +153,7 @@ async fn i_test_fetch_messsages() -> Result<()> {
     loop {
         let res = client
             .get(format!(
-                "http://localhost:{}/api/queues/%2f/{}",
-                management_port, queue_name
+                "http://localhost:{management_port}/api/queues/%2f/{queue_name}"
             ))
             .basic_auth("guest", Some("guest"))
             .send()
@@ -175,8 +173,10 @@ async fn i_test_fetch_messsages() -> Result<()> {
         }
     }
 
-    let mut cfg = Config::default();
-    cfg.url = Some(format!("amqp://guest:guest@127.0.0.1:{}/%2f", amqp_port));
+    let mut cfg = Config {
+        url: Some(format!("amqp://guest:guest@127.0.0.1:{amqp_port}/%2f")),
+        ..Default::default()
+    };
 
     cfg.pool = Some(PoolConfig::new(1));
 
@@ -238,8 +238,7 @@ async fn i_test_replay_time_frame() -> Result<()> {
     loop {
         let res = client
             .get(format!(
-                "http://localhost:{}/api/queues/%2f/{}",
-                management_port, queue_name
+                "http://localhost:{management_port}/api/queues/%2f/{queue_name}"
             ))
             .basic_auth("guest", Some("guest"))
             .send()
@@ -259,10 +258,10 @@ async fn i_test_replay_time_frame() -> Result<()> {
         }
     }
 
-    let mut cfg = Config::default();
-    cfg.url = Some(format!("amqp://guest:guest@localhost:{}/%2f", amqp_port));
-
-    cfg.pool = Some(PoolConfig::new(1));
+    let cfg = Config {
+        url: Some(format!("amqp://guest:guest@localhost:{amqp_port}/%2f")),
+        ..Default::default()
+    };
 
     let pool = cfg.create_pool(Some(Runtime::Tokio1)).unwrap();
     let rabbitmq_config = RabbitmqApiConfig {
@@ -283,7 +282,6 @@ async fn i_test_replay_time_frame() -> Result<()> {
     assert_eq!(replayed_messages.len(), published_messages.len());
 
     replayed_messages.iter().enumerate().for_each(|(i, m)| {
-        let m = m.clone();
         assert_eq!(
             String::from_utf8(m.data.clone()).unwrap(),
             published_messages[i].data
@@ -334,8 +332,7 @@ async fn i_test_replay_header() -> Result<()> {
     loop {
         let res = client
             .get(format!(
-                "http://localhost:{}/api/queues/%2f/{}",
-                management_port, queue_name
+                "http://localhost:{management_port}/api/queues/%2f/{queue_name}"
             ))
             .basic_auth("guest", Some("guest"))
             .send()
@@ -355,9 +352,10 @@ async fn i_test_replay_header() -> Result<()> {
         }
     }
 
-    let mut cfg = Config::default();
-    cfg.url = Some(format!("amqp://guest:guest@localhost:{}/%2f", amqp_port));
-
+    let mut cfg = Config {
+        url: Some(format!("amqp://guest:guest@localhost:{amqp_port}/%2f")),
+        ..Default::default()
+    };
     cfg.pool = Some(PoolConfig::new(1));
 
     let pool = cfg.create_pool(Some(Runtime::Tokio1)).unwrap();
